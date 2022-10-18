@@ -26,18 +26,36 @@ async fn main() {
     let mut particles = Particles::new(&mut rng);
     let mut rules = Rules::new(&mut rng);
 
-    loop {
-        particles.step(&mut rng, &rules);
+    let mut paused = false;
 
-        if is_mouse_button_pressed(MouseButton::Left) {
-            particles = Particles::new(&mut rng);
-            rules = Rules::new(&mut rng);
-            for i in 0..PARTICLES_TYPES_AMOUNT {
-                colors[i] = Color::random(&mut rng);
-            }
+    loop {
+        if !paused {
+            particles.step(&mut rng, &rules);
         }
 
+        egui_macroquad::ui(|egui_ctx| {
+            egui::TopBottomPanel::top("a").show(egui_ctx, |ui| {
+                ui.horizontal(|ui| {
+                    if ui
+                        .button(if paused { "Continue" } else { "Pause" })
+                        .clicked()
+                    {
+                        paused = !paused;
+                    }
+                    if ui.button("New rules").clicked() {
+                        particles = Particles::new(&mut rng);
+                        rules = Rules::new(&mut rng);
+                        for i in 0..PARTICLES_TYPES_AMOUNT {
+                            colors[i] = Color::random(&mut rng);
+                        }
+                    }
+                });
+            });
+        });
+
         update_image(&particles, &colors);
+        egui_macroquad::draw();
+
         next_frame().await
     }
 }
