@@ -3,7 +3,7 @@ use macroquad::prelude::*;
 
 use particles_life::*;
 
-fn update_image(particles: &Particles, colors: &[Color; PARTICLES_TYPES]) {
+fn update_image(particles: &Particles, colors: &[Color; PARTICLES_TYPES_AMOUNT]) {
     let dx = screen_width() / 2.;
     let dy = screen_height() / 2.;
     clear_background(BLACK);
@@ -18,8 +18,8 @@ fn update_image(particles: &Particles, colors: &[Color; PARTICLES_TYPES]) {
 async fn main() {
     let mut rng = thread_rng();
 
-    let mut colors = [BLACK; PARTICLES_TYPES];
-    for i in 0..PARTICLES_TYPES {
+    let mut colors = [BLACK; PARTICLES_TYPES_AMOUNT];
+    for i in 0..PARTICLES_TYPES_AMOUNT {
         colors[i] = Color::random(&mut rng);
     }
 
@@ -32,7 +32,7 @@ async fn main() {
         if is_mouse_button_pressed(MouseButton::Left) {
             particles = Particles::new(&mut rng);
             rules = Rules::new(&mut rng);
-            for i in 0..PARTICLES_TYPES {
+            for i in 0..PARTICLES_TYPES_AMOUNT {
                 colors[i] = Color::random(&mut rng);
             }
         }

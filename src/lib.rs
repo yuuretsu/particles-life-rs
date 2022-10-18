@@ -44,14 +44,14 @@ impl Lerp for f64 {
 }
 
 pub struct Rules {
-    rules: [[f64; PARTICLES_TYPES]; PARTICLES_TYPES],
+    rules: [[f64; PARTICLES_TYPES_AMOUNT]; PARTICLES_TYPES_AMOUNT],
 }
 
 impl Rules {
     pub fn new(rng: &mut ThreadRng) -> Self {
-        let mut rules = [[0.0; PARTICLES_TYPES]; PARTICLES_TYPES];
-        for y in 0..PARTICLES_TYPES {
-            for x in 0..PARTICLES_TYPES {
+        let mut rules = [[0.0; PARTICLES_TYPES_AMOUNT]; PARTICLES_TYPES_AMOUNT];
+        for y in 0..PARTICLES_TYPES_AMOUNT {
+            for x in 0..PARTICLES_TYPES_AMOUNT {
                 rules[y][x] = (f64::random(rng) - 0.5) * 100.;
             }
         }
@@ -106,7 +106,7 @@ impl Particles {
             let distance = f64::random(rng).sqrt() * 250.;
             let x = angle.cos() * distance;
             let y = angle.sin() * distance;
-            list[i] = Particle::new(x, y, u8::random(rng) % PARTICLES_TYPES as u8);
+            list[i] = Particle::new(x, y, u8::random(rng) % PARTICLES_TYPES_AMOUNT as u8);
         }
         Self { particles: list }
     }
@@ -147,4 +147,4 @@ impl Particles {
 }
 
 const PARTICLES_AMOUNT: usize = 2000;
-pub const PARTICLES_TYPES: usize = 6;
+pub const PARTICLES_TYPES_AMOUNT: usize = 6;
