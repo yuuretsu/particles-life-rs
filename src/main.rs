@@ -8,9 +8,16 @@ fn update_image(particles: &Particles, colors: &[Color; PARTICLES_TYPES_AMOUNT],
     let dy = screen_height() / 2. + dy;
     clear_background(BLACK);
     for p in particles.list() {
-        let mut color = colors[p.t as usize];
+        let mut color = colors[p.rule as usize];
         color.a = 0.75;
-        draw_poly(p.x as f32 + dx, p.y as f32 + dy, 8, 3., 0., color);
+        draw_poly(
+            p.visual_x as f32 + dx,
+            p.visual_y as f32 + dy,
+            8,
+            3.,
+            0.,
+            color,
+        );
     }
 }
 

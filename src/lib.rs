@@ -58,20 +58,28 @@ impl Rules {
         Self { rules }
     }
     fn get(&self, a: &Particle, b: &Particle) -> f64 {
-        self.rules[a.t as usize][b.t as usize]
+        self.rules[a.rule as usize][b.rule as usize]
     }
 }
 
 #[derive(Clone, Copy)]
 pub struct Particle {
-    pub x: f64,
-    pub y: f64,
-    pub t: u8,
+    pub real_x: f64,
+    pub real_y: f64,
+    pub rule: u8,
+    pub visual_x: f64,
+    pub visual_y: f64,
 }
 
 impl Particle {
     pub fn new(x: f64, y: f64, t: u8) -> Self {
-        Self { x, y, t }
+        Self {
+            real_x: x,
+            real_y: y,
+            rule: t,
+            visual_x: x,
+            visual_y: y,
+        }
     }
     fn apply_force(&mut self, rng: &mut ThreadRng, force: (f64, f64)) {
         let mut sx = force.0;
@@ -83,8 +91,10 @@ impl Particle {
             sx = angle.cos() * dist;
             sy = angle.sin() * dist;
         }
-        self.x += sx;
-        self.y += sy;
+        self.real_x += sx;
+        self.real_y += sy;
+        self.visual_x = self.visual_x.lerp(self.real_x, 0.1);
+        self.visual_y = self.visual_y.lerp(self.real_y, 0.1);
     }
 }
 
@@ -121,8 +131,8 @@ impl Particles {
                     continue;
                 };
                 let rule = rules.get(particle, other_particle);
-                let dx = particle.x - other_particle.x;
-                let dy = particle.y - other_particle.y;
+                let dx = particle.real_x - other_particle.real_x;
+                let dy = particle.real_y - other_particle.real_y;
                 let d2 = dx * dx + dy * dy;
                 let normalised_d2 = d2.max(100.);
                 let distance = d2.sqrt();
@@ -141,7 +151,7 @@ impl Particles {
     pub fn step(&mut self, rng: &mut ThreadRng, rules: &Rules) {
         let forces = self.get_forces(rules);
         for i in 0..forces.len() {
-            self.particles[i].apply_force(rng, forces[i])
+            self.particles[i].apply_force(rng, forces[i]);
         }
     }
 }
