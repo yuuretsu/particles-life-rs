@@ -41,8 +41,12 @@ async fn main() {
         }
 
         egui_macroquad::ui(|egui_ctx| {
-            egui::TopBottomPanel::top("top_panel").show(egui_ctx, |ui| {
-                ui.horizontal(|ui| {
+            egui::Window::new("a")
+                .fixed_size((f32::MAX, f32::MAX))
+                .fixed_pos((20.0, 20.0))
+                .title_bar(false)
+                .collapsible(false)
+                .show(egui_ctx, |ui| {
                     if ui
                         .button(if paused { "Continue" } else { "Pause" })
                         .clicked()
@@ -57,7 +61,6 @@ async fn main() {
                         }
                     }
                 });
-            });
         });
 
         if is_dragging {
