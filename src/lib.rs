@@ -82,17 +82,18 @@ impl Particle {
         }
     }
     fn apply_force(&mut self, rng: &mut ThreadRng, force: (f64, f64)) {
-        let mut sx = force.0;
-        let mut sy = force.1;
-        let speed = sx.hypot(sy);
+        self.real_x += force.0;
+        self.real_y += force.1;
+        let speed = force.0.hypot(force.1);
         if speed > 10. {
             let angle = f64::random(rng) * PI * 2.;
             let dist = 60.;
-            sx = angle.cos() * dist;
-            sy = angle.sin() * dist;
+            self.real_x += angle.cos() * dist;
+            self.real_y += angle.sin() * dist;
+            self.visual_x = self.real_x;
+            self.visual_y = self.real_y;
+            return;
         }
-        self.real_x += sx;
-        self.real_y += sy;
         self.visual_x = self.visual_x.lerp(self.real_x, 0.1);
         self.visual_y = self.visual_y.lerp(self.real_y, 0.1);
     }
