@@ -34,7 +34,7 @@ async fn main() {
         }
 
         egui_macroquad::ui(|egui_ctx| {
-            egui::TopBottomPanel::top("a").show(egui_ctx, |ui| {
+            egui::TopBottomPanel::top("top_panel").show(egui_ctx, |ui| {
                 ui.horizontal(|ui| {
                     if ui
                         .button(if paused { "Continue" } else { "Pause" })
