@@ -1,47 +1,12 @@
+mod helpers;
+mod lerp;
+mod random;
+
+use helpers::compare_pointers;
+pub use lerp::Lerp;
+use rand::rngs::ThreadRng;
+pub use random::Random;
 use std::f64::consts::PI;
-
-use rand::{rngs::ThreadRng, Rng};
-
-pub trait Random {
-    fn random(rng: &mut ThreadRng) -> Self;
-}
-
-impl Random for f32 {
-    fn random(rng: &mut ThreadRng) -> Self {
-        rng.gen()
-    }
-}
-
-impl Random for f64 {
-    fn random(rng: &mut ThreadRng) -> Self {
-        rng.gen()
-    }
-}
-
-impl Random for u8 {
-    fn random(rng: &mut ThreadRng) -> Self {
-        rng.gen()
-    }
-}
-
-impl Random for macroquad::prelude::Color {
-    fn random(rng: &mut ThreadRng) -> Self {
-        let r = f32::random(rng);
-        let g = f32::random(rng);
-        let b = f32::random(rng);
-        macroquad::prelude::Color::new(r, g, b, 1.)
-    }
-}
-
-trait Lerp {
-    fn lerp(self, b: Self, t: f64) -> Self;
-}
-
-impl Lerp for f64 {
-    fn lerp(self, b: Self, t: f64) -> Self {
-        self * (1. - t) + b * t
-    }
-}
 
 pub struct Rules {
     rules: [[f64; PARTICLES_TYPES_AMOUNT]; PARTICLES_TYPES_AMOUNT],
@@ -57,18 +22,18 @@ impl Rules {
         }
         Self { rules }
     }
-    fn get(&self, a: &Particle, b: &Particle) -> f64 {
+    pub fn get(&self, a: &Particle, b: &Particle) -> f64 {
         self.rules[a.rule as usize][b.rule as usize]
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, Default)]
 pub struct Particle {
     pub real_x: f64,
     pub real_y: f64,
-    pub rule: u8,
     pub visual_x: f64,
     pub visual_y: f64,
+    pub rule: u8,
 }
 
 impl Particle {
@@ -87,21 +52,15 @@ impl Particle {
         let speed = force.0.hypot(force.1);
         if speed > 10. {
             let angle = f64::random(rng) * PI * 2.;
-            let dist = 60.;
+            let dist = 120.;
             self.real_x += angle.cos() * dist;
             self.real_y += angle.sin() * dist;
-            self.visual_x = self.real_x;
-            self.visual_y = self.real_y;
+            // self.visual_x = self.real_x;
+            // self.visual_y = self.real_y;
             return;
         }
-        self.visual_x = self.visual_x.lerp(self.real_x, 0.1);
-        self.visual_y = self.visual_y.lerp(self.real_y, 0.1);
-    }
-}
-
-impl Default for Particle {
-    fn default() -> Self {
-        Self::new(0.0, 0.0, 0)
+        self.visual_x = self.visual_x.lerp(self.real_x, 0.2);
+        self.visual_y = self.visual_y.lerp(self.real_y, 0.2);
     }
 }
 
@@ -111,7 +70,8 @@ pub struct Particles {
 
 impl Particles {
     pub fn new(rng: &mut ThreadRng) -> Self {
-        let mut list = [Particle::default(); PARTICLES_AMOUNT];
+        let particle = Particle::default();
+        let mut list = [particle; PARTICLES_AMOUNT];
         for i in 0..PARTICLES_AMOUNT {
             let angle = f64::random(rng) * PI * 2.;
             let distance = f64::random(rng).sqrt() * 250.;
@@ -121,14 +81,11 @@ impl Particles {
         }
         Self { particles: list }
     }
-    pub fn list(&self) -> &[Particle; PARTICLES_AMOUNT] {
-        &self.particles
-    }
     fn get_forces(&self, rules: &Rules) -> [(f64, f64); PARTICLES_AMOUNT] {
         let mut forces = [(0.0, 0.0); PARTICLES_AMOUNT];
         for (i, particle) in self.particles.iter().enumerate() {
             for other_particle in &self.particles {
-                if (&particle as *const _) == (&other_particle as *const _) {
+                if compare_pointers(particle, other_particle) {
                     continue;
                 };
                 let rule = rules.get(particle, other_particle);
@@ -157,5 +114,14 @@ impl Particles {
     }
 }
 
+impl<'a> IntoIterator for &'a Particles {
+    type Item = Particle;
+    type IntoIter = std::array::IntoIter<Particle, PARTICLES_AMOUNT>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.particles.into_iter()
+    }
+}
+
 const PARTICLES_AMOUNT: usize = 2000;
-pub const PARTICLES_TYPES_AMOUNT: usize = 6;
+pub const PARTICLES_TYPES_AMOUNT: usize = 4;

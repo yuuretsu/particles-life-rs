@@ -7,7 +7,7 @@ fn update_image(particles: &Particles, colors: &[Color; PARTICLES_TYPES_AMOUNT],
     let dx = screen_width() / 2. + dx;
     let dy = screen_height() / 2. + dy;
     clear_background(BLACK);
-    for p in particles.list() {
+    for p in particles.into_iter() {
         let mut color = colors[p.rule as usize];
         color.a = 0.75;
         draw_poly(
@@ -54,13 +54,11 @@ async fn main() {
                 .title_bar(false)
                 .collapsible(false)
                 .show(egui_ctx, |ui| {
-                    if ui
-                        .button(if paused { "Continue" } else { "Pause" })
-                        .clicked()
-                    {
+                    let pause_btn = ui.button(if paused { "Continue" } else { "Pause" });
+                    if pause_btn.clicked() {
                         paused = !paused;
                     }
-                    if ui.button("New rules").clicked() {
+                    if ui.button("Start new").clicked() {
                         particles = Particles::new(&mut rng);
                         rules = Rules::new(&mut rng);
                         for i in 0..PARTICLES_TYPES_AMOUNT {
