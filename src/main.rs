@@ -1,5 +1,5 @@
-use ::rand::thread_rng;
-use macroquad::prelude::*;
+use ::rand::{rngs::ThreadRng, thread_rng, Rng};
+use macroquad::{color::hsl_to_rgb, prelude::*};
 
 use particles_life::*;
 
@@ -21,14 +21,19 @@ fn update_image(particles: &Particles, colors: &[Color; PARTICLES_TYPES_AMOUNT],
     }
 }
 
+fn generate_colors(rng: &mut ThreadRng) -> [Color; PARTICLES_TYPES_AMOUNT] {
+    (0..PARTICLES_TYPES_AMOUNT)
+        .map(|_| hsl_to_rgb(rng.gen(), 1., 0.5))
+        .collect::<Vec<Color>>()
+        .try_into()
+        .unwrap()
+}
+
 #[macroquad::main("Particles life")]
 async fn main() {
     let mut rng = thread_rng();
 
-    let mut colors = [BLACK; PARTICLES_TYPES_AMOUNT];
-    for i in 0..PARTICLES_TYPES_AMOUNT {
-        colors[i] = Color::random(&mut rng);
-    }
+    let mut colors = generate_colors(&mut rng);
 
     let mut particles = Particles::new(&mut rng);
     let mut rules = Rules::new(&mut rng);
@@ -61,9 +66,7 @@ async fn main() {
                     if ui.button("Start new").clicked() {
                         particles = Particles::new(&mut rng);
                         rules = Rules::new(&mut rng);
-                        for i in 0..PARTICLES_TYPES_AMOUNT {
-                            colors[i] = Color::random(&mut rng);
-                        }
+                        colors = generate_colors(&mut rng);
                     }
                 });
         });
