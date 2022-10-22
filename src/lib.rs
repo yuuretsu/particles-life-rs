@@ -52,41 +52,33 @@ impl Particle {
             visual_y: pos.y,
         }
     }
-    fn get_force(&self, other: &Particle, rules: &Rules) -> (f32, f32) {
+    fn get_force(&self, other: &Particle, rules: &Rules) -> Vec2 {
         if is_same_pointer(self, other) {
-            (0., 0.)
+            Vec2::ZERO
         } else {
             let rule = rules.get(self, other);
-            let dx = self.real_pos.x - other.real_pos.x;
-            let dy = self.real_pos.y - other.real_pos.y;
-            let d2 = dx * dx + dy * dy;
+            let dx_dy = self.real_pos - other.real_pos;
+            let d2 = dx_dy.length_sq();
             let normalised_d2 = d2.max(100.);
             let distance = d2.sqrt();
             if distance > 50. || distance == 0. {
-                return (0., 0.);
+                return Vec2::ZERO;
             }
             let cur = (-10.).lerp(rule, distance.powf(0.8) * 0.03) * 20.;
-            let angle = dy.atan2(dx);
+            let angle = dx_dy.angle();
             let speed = (1. / normalised_d2) * -cur;
-            // forces[i].x += angle.cos() * speed;
-            // forces[i].y += angle.sin() * speed;
-            (angle.cos() * speed, angle.sin() * speed)
+
+            Vec2::angled(angle) * speed
         }
     }
-    fn apply_force(&mut self, rng: &mut ThreadRng, force: (f32, f32)) {
+    fn apply_force(&mut self, rng: &mut ThreadRng, force: Vec2) {
         let force: Vec2 = force.into();
-        // self.real_x += force.x;
-        // self.real_y += force.y;
         self.real_pos += force;
         let speed = force.length();
         if speed > 10. {
             let angle = f32::random(rng) * PI * 2.;
             let dist = 120.;
-            // self.real_x += angle.cos() * dist;
-            // self.real_y += angle.sin() * dist;
             self.real_pos += Vec2::angled(angle) * dist;
-            // self.visual_x = self.real_x;
-            // self.visual_y = self.real_y;
             return;
         }
         self.visual_x = self.visual_x.lerp(self.real_pos.x, 0.2);
@@ -114,16 +106,14 @@ impl Particles {
         }
         Self { particles: list }
     }
-    fn get_forces(&self, rules: &Rules) -> [(f32, f32); PARTICLES_AMOUNT] {
+    fn get_forces(&self, rules: &Rules) -> [Vec2; PARTICLES_AMOUNT] {
         let mut forces = [Vec2::ZERO; PARTICLES_AMOUNT];
         for (i, particle) in self.particles.iter().enumerate() {
             for other_particle in &self.particles {
-                let force = particle.get_force(other_particle, rules);
-                forces[i].x += force.0;
-                forces[i].y += force.1;
+                forces[i] += particle.get_force(other_particle, rules);
             }
         }
-        forces.map(|force| (force.x, force.y))
+        forces
     }
     pub fn step(&mut self, rng: &mut ThreadRng, rules: &Rules) {
         let forces = self.get_forces(rules);
