@@ -6,7 +6,11 @@ use egui::Vec2;
 use macroquad::{color::hsl_to_rgb, prelude::*};
 use particles_life::*;
 
-fn update_image(particles: &Particles, offset: Vec2, colors: &[Color; PARTICLES_TYPES_AMOUNT]) {
+fn update_image(
+    particles: &ParticlesSystem,
+    offset: Vec2,
+    colors: &[Color; PARTICLES_TYPES_AMOUNT],
+) {
     let center = Vec2::new(screen_width(), screen_height()) / 2.;
     let offset = center + offset;
     clear_background(BLACK);
@@ -34,7 +38,7 @@ async fn main() {
 
     let mut colors = generate_colors(&mut rng);
 
-    let mut particles = Particles::new(&mut rng);
+    let mut particles = ParticlesSystem::new(&mut rng);
 
     let mut rules = Rules::new();
     rules.fill_random(&mut rng);
@@ -61,7 +65,7 @@ async fn main() {
                             paused = !paused;
                         }
                         if ui.button("Start new").clicked() {
-                            particles = Particles::new(&mut rng);
+                            particles = ParticlesSystem::new(&mut rng);
                             rules.fill_random(&mut rng);
                             colors = generate_colors(&mut rng);
                             offset = Draggable::new(Vec2::ZERO);

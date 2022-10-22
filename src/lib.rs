@@ -78,11 +78,11 @@ impl Particle {
     }
 }
 
-pub struct Particles {
+pub struct ParticlesSystem {
     particles: [Particle; PARTICLES_AMOUNT],
 }
 
-impl Particles {
+impl ParticlesSystem {
     pub fn new(rng: &mut ThreadRng) -> Self {
         let particle = Particle::default();
         let mut list = [particle; PARTICLES_AMOUNT];
@@ -113,7 +113,7 @@ impl Particles {
     }
 }
 
-impl<'a> IntoIterator for &'a Particles {
+impl<'a> IntoIterator for &'a ParticlesSystem {
     type Item = Particle;
     type IntoIter = std::array::IntoIter<Particle, PARTICLES_AMOUNT>;
 
