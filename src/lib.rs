@@ -1,12 +1,10 @@
 mod helpers;
 mod lerp;
-mod random;
 
 use ::lerp::Lerp;
 use egui::Vec2;
 use helpers::is_same_pointer;
-use rand::rngs::ThreadRng;
-use random::Random;
+use rand::{rngs::ThreadRng, Rng};
 use std::f32::consts::PI;
 
 #[derive(Default)]
@@ -23,7 +21,7 @@ impl Rules {
     pub fn fill_random(&mut self, rng: &mut ThreadRng) {
         for y in 0..PARTICLES_TYPES_AMOUNT {
             for x in 0..PARTICLES_TYPES_AMOUNT {
-                self.rules[y][x] = (f32::random(rng) - 0.5) * 100.;
+                self.rules[y][x] = (rng.gen::<f32>() - 0.5) * 100.;
             }
         }
     }
@@ -71,7 +69,7 @@ impl Particle {
         self.real_pos += force;
         let speed = force.length();
         if speed > 10. {
-            let angle = f32::random(rng) * PI * 2.;
+            let angle = rng.gen::<f32>() * PI * 2.;
             let dist = 120.;
             self.real_pos += Vec2::angled(angle) * dist;
             return;
@@ -90,13 +88,11 @@ impl Particles {
         let particle = Particle::default();
         let mut list = [particle; PARTICLES_AMOUNT];
         for i in 0..PARTICLES_AMOUNT {
-            let angle = f32::random(rng) * PI * 2.;
-            let distance = f32::random(rng).sqrt() * 250.;
-            let x = angle.cos() * distance;
-            let y = angle.sin() * distance;
+            let angle = rng.gen::<f32>() * PI * 2.;
+            let distance = rng.gen::<f32>().sqrt() * 250.;
             list[i] = Particle::new(
-                Vec2::new(x, y),
-                u8::random(rng) % PARTICLES_TYPES_AMOUNT as u8,
+                Vec2::angled(angle) * distance,
+                rng.gen::<u8>() % PARTICLES_TYPES_AMOUNT as u8,
             );
         }
         Self { particles: list }

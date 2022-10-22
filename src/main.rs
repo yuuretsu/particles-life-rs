@@ -1,25 +1,28 @@
+mod draggable;
+
 use ::rand::{rngs::ThreadRng, thread_rng, Rng};
 use draggable::Draggable;
 use egui::Vec2;
 use macroquad::{color::hsl_to_rgb, prelude::*};
-mod draggable;
-
 use particles_life::*;
 
-fn update_image(particles: &Particles, colors: &[Color; PARTICLES_TYPES_AMOUNT], offset: Vec2) {
-    let offset = Vec2::new(screen_width() / 2., screen_height() / 2.) + offset;
+fn update_image(particles: &Particles, offset: Vec2, colors: &[Color; PARTICLES_TYPES_AMOUNT]) {
+    let center = Vec2::new(screen_width(), screen_height()) / 2.;
+    let offset = center + offset;
     clear_background(BLACK);
-    for p in particles.into_iter() {
-        let mut color = colors[p.rule as usize];
-        color.a = 0.75;
-        let (x, y) = (p.visual_pos + offset).into();
-        draw_poly(x, y, 8, 3., 0., color);
+    for particle in particles.into_iter() {
+        let (x, y) = (particle.visual_pos + offset).into();
+        draw_poly(x, y, 8, 3., 0., colors[particle.rule as usize]);
     }
 }
 
 fn generate_colors(rng: &mut ThreadRng) -> [Color; PARTICLES_TYPES_AMOUNT] {
     (0..PARTICLES_TYPES_AMOUNT)
-        .map(|_| hsl_to_rgb(rng.gen(), 1., 0.5))
+        .map(|_| {
+            let mut color = hsl_to_rgb(rng.gen(), 1., 0.5);
+            color.a = 0.75;
+            color
+        })
         .collect::<Vec<Color>>()
         .try_into()
         .unwrap()
@@ -32,11 +35,12 @@ async fn main() {
     let mut colors = generate_colors(&mut rng);
 
     let mut particles = Particles::new(&mut rng);
+
     let mut rules = Rules::new();
     rules.fill_random(&mut rng);
 
     let mut paused = false;
-    let mut offset = Draggable::new(Vec2::new(0., 0.));
+    let mut offset = Draggable::new(Vec2::ZERO);
 
     loop {
         let mouse_pos: Vec2 = mouse_position().into();
@@ -60,6 +64,7 @@ async fn main() {
                             particles = Particles::new(&mut rng);
                             rules.fill_random(&mut rng);
                             colors = generate_colors(&mut rng);
+                            offset = Draggable::new(Vec2::ZERO);
                         }
                     });
                 });
@@ -75,9 +80,13 @@ async fn main() {
             offset.end_dragging();
         }
 
-        update_image(&particles, &colors, offset.position);
+        if is_key_down(KeyCode::Escape) {
+            break;
+        }
+
+        update_image(&particles, offset.position, &colors);
         egui_macroquad::draw();
 
-        next_frame().await
+        next_frame().await;
     }
 }
