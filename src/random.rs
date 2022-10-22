@@ -11,12 +11,6 @@ impl Random for f32 {
     }
 }
 
-impl Random for f64 {
-    fn random(rng: &mut ThreadRng) -> Self {
-        rng.gen()
-    }
-}
-
 impl Random for u8 {
     fn random(rng: &mut ThreadRng) -> Self {
         rng.gen()
