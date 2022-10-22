@@ -36,7 +36,8 @@ async fn main() {
     let mut colors = generate_colors(&mut rng);
 
     let mut particles = Particles::new(&mut rng);
-    let mut rules = Rules::new(&mut rng);
+    let mut rules = Rules::new();
+    rules.fill_random(&mut rng);
 
     let mut paused = false;
 
@@ -65,7 +66,7 @@ async fn main() {
                     }
                     if ui.button("Start new").clicked() {
                         particles = Particles::new(&mut rng);
-                        rules = Rules::new(&mut rng);
+                        rules.fill_random(&mut rng);
                         colors = generate_colors(&mut rng);
                     }
                 });

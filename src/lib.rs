@@ -13,14 +13,16 @@ pub struct Rules {
 }
 
 impl Rules {
-    pub fn new(rng: &mut ThreadRng) -> Self {
-        let mut rules = [[0.0; PARTICLES_TYPES_AMOUNT]; PARTICLES_TYPES_AMOUNT];
+    pub fn new() -> Self {
+        let rules = [[0.0; PARTICLES_TYPES_AMOUNT]; PARTICLES_TYPES_AMOUNT];
+        Self { rules }
+    }
+    pub fn fill_random(&mut self, rng: &mut ThreadRng) {
         for y in 0..PARTICLES_TYPES_AMOUNT {
             for x in 0..PARTICLES_TYPES_AMOUNT {
-                rules[y][x] = (f64::random(rng) - 0.5) * 100.;
+                self.rules[y][x] = (f64::random(rng) - 0.5) * 100.;
             }
         }
-        Self { rules }
     }
     pub fn get(&self, a: &Particle, b: &Particle) -> f64 {
         self.rules[a.rule as usize][b.rule as usize]
@@ -124,4 +126,4 @@ impl<'a> IntoIterator for &'a Particles {
 }
 
 const PARTICLES_AMOUNT: usize = 2000;
-pub const PARTICLES_TYPES_AMOUNT: usize = 4;
+pub const PARTICLES_TYPES_AMOUNT: usize = 6;
