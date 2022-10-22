@@ -1,6 +1,8 @@
 use ::rand::{rngs::ThreadRng, thread_rng, Rng};
+use draggable::Draggable;
 use egui::Vec2;
 use macroquad::{color::hsl_to_rgb, prelude::*};
+mod draggable;
 
 use particles_life::*;
 
@@ -34,10 +36,7 @@ async fn main() {
     rules.fill_random(&mut rng);
 
     let mut paused = false;
-
-    let mut is_dragging = false;
-    let mut offset = Vec2::new(0.0, 0.0);
-    let mut temp_offset = Vec2::new(0.0, 0.0);
+    let mut offset = Draggable::new(Vec2::new(0., 0.));
 
     loop {
         let mouse_pos: Vec2 = mouse_position().into();
@@ -48,36 +47,35 @@ async fn main() {
         egui_macroquad::ui(|egui_ctx| {
             egui::Window::new("a")
                 .fixed_size((f32::MAX, f32::MAX))
-                .fixed_pos((20.0, 20.0))
+                .fixed_pos((10.0, 10.0))
                 .title_bar(false)
                 .collapsible(false)
                 .show(egui_ctx, |ui| {
-                    let pause_btn = ui.button(if paused { "Continue" } else { "Pause" });
-                    if pause_btn.clicked() {
-                        paused = !paused;
-                    }
-                    if ui.button("Start new").clicked() {
-                        particles = Particles::new(&mut rng);
-                        rules.fill_random(&mut rng);
-                        colors = generate_colors(&mut rng);
-                    }
+                    ui.horizontal(|ui| {
+                        let pause_btn = ui.button(if paused { "Continue" } else { "Pause" });
+                        if pause_btn.clicked() {
+                            paused = !paused;
+                        }
+                        if ui.button("Start new").clicked() {
+                            particles = Particles::new(&mut rng);
+                            rules.fill_random(&mut rng);
+                            colors = generate_colors(&mut rng);
+                        }
+                    });
                 });
         });
 
-        if is_dragging {
-            offset = mouse_pos + temp_offset;
-        }
+        offset.update(mouse_pos);
 
         if is_mouse_button_pressed(MouseButton::Left) {
-            is_dragging = true;
-            temp_offset = offset - mouse_pos;
+            offset.start_dragging(mouse_pos);
         }
 
         if is_mouse_button_released(MouseButton::Left) {
-            is_dragging = false;
+            offset.end_dragging();
         }
 
-        update_image(&particles, &colors, offset);
+        update_image(&particles, &colors, offset.position);
         egui_macroquad::draw();
 
         next_frame().await
