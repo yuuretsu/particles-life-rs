@@ -48,13 +48,13 @@ async fn main() {
             particles.step(&mut rng, &rules);
         }
 
-        egui_macroquad::ui(|egui_ctx| {
+        egui_macroquad::ui(|ctx| {
             egui::Window::new("a")
                 .fixed_size((f32::MAX, f32::MAX))
                 .fixed_pos((10.0, 10.0))
                 .title_bar(false)
                 .collapsible(false)
-                .show(egui_ctx, |ui| {
+                .show(ctx, |ui| {
                     ui.horizontal(|ui| {
                         let pause_btn = ui.button(if paused { "Continue" } else { "Pause" });
                         if pause_btn.clicked() {
