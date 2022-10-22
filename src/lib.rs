@@ -35,38 +35,62 @@ impl Rules {
 
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Particle {
-    pub real_x: f32,
-    pub real_y: f32,
+    // pub real_x: f32,
+    // pub real_y: f32,
+    pub real_pos: Vec2,
     pub visual_x: f32,
     pub visual_y: f32,
     pub rule: u8,
 }
 
 impl Particle {
-    pub fn new(x: f32, y: f32, t: u8) -> Self {
+    pub fn new(pos: Vec2, t: u8) -> Self {
         Self {
-            real_x: x,
-            real_y: y,
+            real_pos: pos,
             rule: t,
-            visual_x: x,
-            visual_y: y,
+            visual_x: pos.x,
+            visual_y: pos.y,
+        }
+    }
+    fn get_force(&self, other: &Particle, rules: &Rules) -> (f32, f32) {
+        if compare_pointers(self, other) {
+            (0., 0.)
+        } else {
+            let rule = rules.get(self, other);
+            let dx = self.real_pos.x - other.real_pos.x;
+            let dy = self.real_pos.y - other.real_pos.y;
+            let d2 = dx * dx + dy * dy;
+            let normalised_d2 = d2.max(100.);
+            let distance = d2.sqrt();
+            if distance > 50. || distance == 0. {
+                return (0., 0.);
+            }
+            let cur = (-10.).lerp(rule, distance.powf(0.8) * 0.03) * 20.;
+            let angle = dy.atan2(dx);
+            let speed = (1. / normalised_d2) * -cur;
+            // forces[i].x += angle.cos() * speed;
+            // forces[i].y += angle.sin() * speed;
+            (angle.cos() * speed, angle.sin() * speed)
         }
     }
     fn apply_force(&mut self, rng: &mut ThreadRng, force: (f32, f32)) {
-        self.real_x += force.0;
-        self.real_y += force.1;
-        let speed = force.0.hypot(force.1);
+        let force: Vec2 = force.into();
+        // self.real_x += force.x;
+        // self.real_y += force.y;
+        self.real_pos += force;
+        let speed = force.length();
         if speed > 10. {
             let angle = f32::random(rng) * PI * 2.;
             let dist = 120.;
-            self.real_x += angle.cos() * dist;
-            self.real_y += angle.sin() * dist;
+            // self.real_x += angle.cos() * dist;
+            // self.real_y += angle.sin() * dist;
+            self.real_pos += Vec2::angled(angle) * dist;
             // self.visual_x = self.real_x;
             // self.visual_y = self.real_y;
             return;
         }
-        self.visual_x = self.visual_x.lerp(self.real_x, 0.2);
-        self.visual_y = self.visual_y.lerp(self.real_y, 0.2);
+        self.visual_x = self.visual_x.lerp(self.real_pos.x, 0.2);
+        self.visual_y = self.visual_y.lerp(self.real_pos.y, 0.2);
     }
 }
 
@@ -83,34 +107,23 @@ impl Particles {
             let distance = f32::random(rng).sqrt() * 250.;
             let x = angle.cos() * distance;
             let y = angle.sin() * distance;
-            list[i] = Particle::new(x, y, u8::random(rng) % PARTICLES_TYPES_AMOUNT as u8);
+            list[i] = Particle::new(
+                Vec2::new(x, y),
+                u8::random(rng) % PARTICLES_TYPES_AMOUNT as u8,
+            );
         }
         Self { particles: list }
     }
     fn get_forces(&self, rules: &Rules) -> [(f32, f32); PARTICLES_AMOUNT] {
-        let mut forces = [(0.0, 0.0); PARTICLES_AMOUNT];
+        let mut forces = [Vec2::ZERO; PARTICLES_AMOUNT];
         for (i, particle) in self.particles.iter().enumerate() {
             for other_particle in &self.particles {
-                if compare_pointers(particle, other_particle) {
-                    continue;
-                };
-                let rule = rules.get(particle, other_particle);
-                let dx = particle.real_x - other_particle.real_x;
-                let dy = particle.real_y - other_particle.real_y;
-                let d2 = dx * dx + dy * dy;
-                let normalised_d2 = d2.max(100.);
-                let distance = d2.sqrt();
-                if distance > 50. || distance == 0. {
-                    continue;
-                }
-                let cur = (-10.).lerp(rule, distance.powf(0.8) * 0.03) * 20.;
-                let angle = dy.atan2(dx);
-                let speed = (1. / normalised_d2) * -cur;
-                forces[i].0 += angle.cos() * speed;
-                forces[i].1 += angle.sin() * speed;
+                let force = particle.get_force(other_particle, rules);
+                forces[i].x += force.0;
+                forces[i].y += force.1;
             }
         }
-        forces
+        forces.map(|force| (force.x, force.y))
     }
     pub fn step(&mut self, rng: &mut ThreadRng, rules: &Rules) {
         let forces = self.get_forces(rules);
