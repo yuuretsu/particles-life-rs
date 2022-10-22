@@ -4,7 +4,7 @@ mod random;
 
 use ::lerp::Lerp;
 use egui::Vec2;
-use helpers::compare_pointers;
+use helpers::is_same_pointer;
 // pub use lerp::Lerp;
 use rand::rngs::ThreadRng;
 pub use random::Random;
@@ -53,7 +53,7 @@ impl Particle {
         }
     }
     fn get_force(&self, other: &Particle, rules: &Rules) -> (f32, f32) {
-        if compare_pointers(self, other) {
+        if is_same_pointer(self, other) {
             (0., 0.)
         } else {
             let rule = rules.get(self, other);
