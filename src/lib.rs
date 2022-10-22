@@ -8,14 +8,16 @@ use rand::rngs::ThreadRng;
 pub use random::Random;
 use std::f64::consts::PI;
 
+#[derive(Default)]
 pub struct Rules {
     rules: [[f64; PARTICLES_TYPES_AMOUNT]; PARTICLES_TYPES_AMOUNT],
 }
 
 impl Rules {
     pub fn new() -> Self {
-        let rules = [[0.0; PARTICLES_TYPES_AMOUNT]; PARTICLES_TYPES_AMOUNT];
-        Self { rules }
+        Self {
+            ..Default::default()
+        }
     }
     pub fn fill_random(&mut self, rng: &mut ThreadRng) {
         for y in 0..PARTICLES_TYPES_AMOUNT {
