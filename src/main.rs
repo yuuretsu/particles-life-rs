@@ -1,10 +1,11 @@
 mod draggable;
+mod particles_life;
 
 use ::rand::{rngs::ThreadRng, thread_rng, Rng};
 use draggable::Draggable;
 use egui::Vec2;
 use macroquad::{color::hsl_to_rgb, prelude::*};
-use particles_life::*;
+use particles_life::{ParticlesSystem, Rules, PARTICLES_TYPES_AMOUNT};
 
 fn update_image(
     particles: &ParticlesSystem,
