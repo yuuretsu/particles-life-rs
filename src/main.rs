@@ -4,8 +4,18 @@ mod particles_life;
 use ::rand::{rngs::ThreadRng, thread_rng, Rng};
 use draggable::Draggable;
 use egui::Vec2;
+use lerp::Lerp;
 use macroquad::{color::hsl_to_rgb, prelude::*};
 use particles_life::{ParticlesSystem, Rules, PARTICLES_TYPES_AMOUNT};
+
+fn lerp_color(a: &Color, b: &Color, t: f32) -> Color {
+    Color {
+        r: a.r.lerp(b.r, t),
+        g: a.g.lerp(b.g, t),
+        b: a.b.lerp(b.b, t),
+        a: a.a.lerp(b.a, t),
+    }
+}
 
 fn update_image(
     particles: &ParticlesSystem,
@@ -17,7 +27,13 @@ fn update_image(
     clear_background(BLACK);
     for particle in particles.into_iter() {
         let (x, y) = (particle.visual_pos + offset).into();
-        draw_poly(x, y, 8, 3., 0., colors[particle.rule as usize]);
+        let speed = (particle.real_pos - particle.visual_pos).length();
+        let color = lerp_color(
+            &colors[particle.rule as usize],
+            &Color::new(1., 1., 1., 0.),
+            speed * 0.05,
+        );
+        draw_poly(x, y, 8, 3., 0., color);
     }
 }
 
