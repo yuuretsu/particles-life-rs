@@ -1,5 +1,4 @@
 mod helpers;
-mod lerp;
 
 use ::lerp::Lerp;
 use egui::Vec2;
