@@ -1,23 +1,17 @@
 use ::rand::{rngs::ThreadRng, thread_rng, Rng};
+use egui::Vec2;
 use macroquad::{color::hsl_to_rgb, prelude::*};
 
 use particles_life::*;
 
-fn update_image(particles: &Particles, colors: &[Color; PARTICLES_TYPES_AMOUNT], dx: f32, dy: f32) {
-    let dx = screen_width() / 2. + dx;
-    let dy = screen_height() / 2. + dy;
+fn update_image(particles: &Particles, colors: &[Color; PARTICLES_TYPES_AMOUNT], offset: Vec2) {
+    let offset = Vec2::new(screen_width() / 2., screen_height() / 2.) + offset;
     clear_background(BLACK);
     for p in particles.into_iter() {
         let mut color = colors[p.rule as usize];
         color.a = 0.75;
-        draw_poly(
-            p.visual_x as f32 + dx,
-            p.visual_y as f32 + dy,
-            8,
-            3.,
-            0.,
-            color,
-        );
+        let (x, y) = (p.visual_pos + offset).into();
+        draw_poly(x, y, 8, 3., 0., color);
     }
 }
 
@@ -42,13 +36,11 @@ async fn main() {
     let mut paused = false;
 
     let mut is_dragging = false;
-    let mut dx = 0.0;
-    let mut dy = 0.0;
-    let mut offset_x = 0.0;
-    let mut offset_y = 0.0;
+    let mut offset = Vec2::new(0.0, 0.0);
+    let mut temp_offset = Vec2::new(0.0, 0.0);
 
     loop {
-        let (mouse_x, mouse_y) = mouse_position();
+        let mouse_pos: Vec2 = mouse_position().into();
         if !paused {
             particles.step(&mut rng, &rules);
         }
@@ -73,21 +65,19 @@ async fn main() {
         });
 
         if is_dragging {
-            dx = mouse_x + offset_x;
-            dy = mouse_y + offset_y;
+            offset = mouse_pos + temp_offset;
         }
 
         if is_mouse_button_pressed(MouseButton::Left) {
             is_dragging = true;
-            offset_x = dx - mouse_x;
-            offset_y = dy - mouse_y;
+            temp_offset = offset - mouse_pos;
         }
 
         if is_mouse_button_released(MouseButton::Left) {
             is_dragging = false;
         }
 
-        update_image(&particles, &colors, dx, dy);
+        update_image(&particles, &colors, offset);
         egui_macroquad::draw();
 
         next_frame().await

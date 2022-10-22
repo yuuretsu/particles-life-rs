@@ -5,9 +5,8 @@ mod random;
 use ::lerp::Lerp;
 use egui::Vec2;
 use helpers::is_same_pointer;
-// pub use lerp::Lerp;
 use rand::rngs::ThreadRng;
-pub use random::Random;
+use random::Random;
 use std::f32::consts::PI;
 
 #[derive(Default)]
@@ -35,11 +34,8 @@ impl Rules {
 
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Particle {
-    // pub real_x: f32,
-    // pub real_y: f32,
     pub real_pos: Vec2,
-    pub visual_x: f32,
-    pub visual_y: f32,
+    pub visual_pos: Vec2,
     pub rule: u8,
 }
 
@@ -47,9 +43,8 @@ impl Particle {
     pub fn new(pos: Vec2, t: u8) -> Self {
         Self {
             real_pos: pos,
+            visual_pos: pos,
             rule: t,
-            visual_x: pos.x,
-            visual_y: pos.y,
         }
     }
     fn get_force(&self, other: &Particle, rules: &Rules) -> Vec2 {
@@ -81,8 +76,8 @@ impl Particle {
             self.real_pos += Vec2::angled(angle) * dist;
             return;
         }
-        self.visual_x = self.visual_x.lerp(self.real_pos.x, 0.2);
-        self.visual_y = self.visual_y.lerp(self.real_pos.y, 0.2);
+        self.visual_pos.x = self.visual_pos.x.lerp(self.real_pos.x, 0.2);
+        self.visual_pos.y = self.visual_pos.y.lerp(self.real_pos.y, 0.2);
     }
 }
 
