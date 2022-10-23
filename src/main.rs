@@ -28,13 +28,20 @@ fn update_image(
     for particle in particles {
         let (x, y) = (particle.visual_pos + offset).into();
         let speed = (particle.real_pos - particle.visual_pos).length();
+        let raduis = 3. + speed * 0.2;
         let [r, g, b] = colors[particle.rule as usize];
         let color = lerp_color(
             &Color::new(r, g, b, 0.75),
             &Color::new(1., 1., 1., 0.),
             speed * 0.02,
         );
-        draw_poly(x, y, 8, 3. + speed * 0.2, 0., color);
+        if x > 0. - raduis
+            && x < screen_width() + raduis
+            && y > 0. - raduis
+            && y < screen_height() + raduis
+        {
+            draw_poly(x, y, 8, raduis, 0., color);
+        }
     }
 }
 
