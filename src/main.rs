@@ -62,7 +62,7 @@ async fn main() {
     rules.fill_random(&mut rng);
 
     let mut paused = false;
-    let mut show_rules = false;
+    let mut show_rules = true;
     let mut offset = Draggable::new(Vec2::ZERO);
 
     loop {
@@ -76,6 +76,7 @@ async fn main() {
                 egui::Window::new("Rules editor")
                     .collapsible(false)
                     .fixed_size((0., 0.))
+                    .default_pos((10., 50.))
                     .show(ctx, |ui| {
                         egui::Grid::new("Rules").show(ui, |ui| {
                             ui.label("".to_string());
@@ -87,7 +88,6 @@ async fn main() {
                             }
                             ui.end_row();
                             for y in 0..PARTICLES_TYPES_AMOUNT {
-                                // ui.label(y.to_string());
                                 egui::widgets::color_picker::color_edit_button_rgb(
                                     ui,
                                     &mut colors[y],
