@@ -32,9 +32,9 @@ fn update_image(
         let color = lerp_color(
             &Color::new(r, g, b, 0.75),
             &Color::new(1., 1., 1., 0.),
-            speed * 0.01,
+            speed * 0.02,
         );
-        draw_poly(x, y, 8, 3., 0., color);
+        draw_poly(x, y, 8, 3. + speed * 0.2, 0., color);
     }
 }
 
