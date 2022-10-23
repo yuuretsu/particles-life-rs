@@ -8,11 +8,11 @@ pub use rules::Rules;
 
 use self::particle::Particle;
 
-pub struct ParticlesSystem {
+pub struct ParticleSystem {
     particles: [Particle; PARTICLES_AMOUNT],
 }
 
-impl ParticlesSystem {
+impl ParticleSystem {
     pub fn new(rng: &mut ThreadRng) -> Self {
         let particle = Particle::default();
         let mut list = [particle; PARTICLES_AMOUNT];
@@ -43,7 +43,7 @@ impl ParticlesSystem {
     }
 }
 
-impl<'a> IntoIterator for &'a ParticlesSystem {
+impl<'a> IntoIterator for &'a ParticleSystem {
     type Item = Particle;
     type IntoIter = std::array::IntoIter<Particle, PARTICLES_AMOUNT>;
 

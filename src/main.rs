@@ -1,12 +1,12 @@
 mod draggable;
-mod particles_life;
+mod particle_system;
 
 use ::rand::{rngs::ThreadRng, thread_rng, Rng};
 use draggable::Draggable;
 use egui::Vec2;
 use lerp::Lerp;
 use macroquad::{color::hsl_to_rgb, prelude::*};
-use particles_life::{ParticlesSystem, Rules, PARTICLES_TYPES_AMOUNT};
+use particle_system::{ParticleSystem, Rules, PARTICLES_TYPES_AMOUNT};
 
 fn lerp_color(a: &Color, b: &Color, t: f32) -> Color {
     Color {
@@ -18,7 +18,7 @@ fn lerp_color(a: &Color, b: &Color, t: f32) -> Color {
 }
 
 fn update_image(
-    particles: &ParticlesSystem,
+    particles: &ParticleSystem,
     offset: Vec2,
     colors: &[[f32; 3]; PARTICLES_TYPES_AMOUNT],
 ) {
@@ -59,7 +59,7 @@ async fn main() {
 
     let mut colors = generate_colors(&mut rng);
 
-    let mut particles = ParticlesSystem::new(&mut rng);
+    let mut particles = ParticleSystem::new(&mut rng);
 
     let mut rules = Rules::new();
     rules.fill_random(&mut rng);
@@ -115,7 +115,7 @@ async fn main() {
                             paused = !paused;
                         }
                         if ui.button("Start new").clicked() {
-                            particles = ParticlesSystem::new(&mut rng);
+                            particles = ParticleSystem::new(&mut rng);
                             rules.fill_random(&mut rng);
                             colors = generate_colors(&mut rng);
                             offset = Draggable::new(Vec2::ZERO);
