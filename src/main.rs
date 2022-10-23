@@ -31,7 +31,7 @@ fn update_image(
         let color = lerp_color(
             &colors[particle.rule as usize],
             &Color::new(1., 1., 1., 0.),
-            speed * 0.05,
+            speed * 0.01,
         );
         draw_poly(x, y, 8, 3., 0., color);
     }
@@ -61,6 +61,7 @@ async fn main() {
     rules.fill_random(&mut rng);
 
     let mut paused = false;
+    let mut show_rules = false;
     let mut offset = Draggable::new(Vec2::ZERO);
 
     loop {
@@ -70,8 +71,29 @@ async fn main() {
         }
 
         egui_macroquad::ui(|ctx| {
-            egui::Window::new("a")
-                .fixed_size((f32::MAX, f32::MAX))
+            if show_rules {
+                egui::Window::new("Rules")
+                    .collapsible(false)
+                    .fixed_size((0., 0.))
+                    .show(ctx, |ui| {
+                        egui::Grid::new("some_unique_id").show(ui, |ui| {
+                            ui.label("".to_string());
+                            for y in 0..PARTICLES_TYPES_AMOUNT {
+                                ui.label(y.to_string());
+                            }
+                            ui.end_row();
+                            for y in 0..PARTICLES_TYPES_AMOUNT {
+                                ui.label(y.to_string());
+                                for x in 0..PARTICLES_TYPES_AMOUNT {
+                                    ui.add(egui::DragValue::new(rules.get_mut(y, x)));
+                                }
+                                ui.end_row();
+                            }
+                        });
+                    });
+            }
+            egui::Window::new("Options")
+                .fixed_size((100., f32::MAX))
                 .fixed_pos((10.0, 10.0))
                 .title_bar(false)
                 .collapsible(false)
@@ -87,18 +109,23 @@ async fn main() {
                             colors = generate_colors(&mut rng);
                             offset = Draggable::new(Vec2::ZERO);
                         }
+                        ui.checkbox(&mut show_rules, "Show rules");
                     });
                 });
         });
 
         offset.update(mouse_pos);
 
-        if is_mouse_button_pressed(MouseButton::Left) {
+        if is_mouse_button_pressed(MouseButton::Right) {
             offset.start_dragging(mouse_pos);
         }
 
-        if is_mouse_button_released(MouseButton::Left) {
+        if is_mouse_button_released(MouseButton::Right) {
             offset.end_dragging();
+        }
+
+        if is_key_pressed(KeyCode::Space) {
+            paused = !paused;
         }
 
         if is_key_down(KeyCode::Escape) {

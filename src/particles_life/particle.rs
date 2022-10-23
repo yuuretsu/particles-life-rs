@@ -24,7 +24,7 @@ impl Particle {
         if self as *const _ == other as *const _ {
             Vec2::ZERO
         } else {
-            let rule = rules.get(self, other);
+            let rule = *rules.get(self.rule as usize, other.rule as usize);
             let dx_dy = self.real_pos - other.real_pos;
             let d2 = dx_dy.length_sq();
             let normalised_d2 = d2.max(100.);
