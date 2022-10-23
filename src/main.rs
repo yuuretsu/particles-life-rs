@@ -25,7 +25,7 @@ fn update_image(
     let center = Vec2::new(screen_width(), screen_height()) / 2.;
     let offset = center + offset;
     clear_background(BLACK);
-    for particle in particles.into_iter() {
+    for particle in particles {
         let (x, y) = (particle.visual_pos + offset).into();
         let speed = (particle.real_pos - particle.visual_pos).length();
         let [r, g, b] = colors[particle.rule as usize];
