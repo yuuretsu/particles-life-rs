@@ -20,7 +20,7 @@ fn lerp_color(a: &Color, b: &Color, t: f32) -> Color {
 fn update_image(
     particles: &ParticlesSystem,
     offset: Vec2,
-    colors: &[Color; PARTICLES_TYPES_AMOUNT],
+    colors: &[[f32; 3]; PARTICLES_TYPES_AMOUNT],
 ) {
     let center = Vec2::new(screen_width(), screen_height()) / 2.;
     let offset = center + offset;
@@ -28,8 +28,9 @@ fn update_image(
     for particle in particles.into_iter() {
         let (x, y) = (particle.visual_pos + offset).into();
         let speed = (particle.real_pos - particle.visual_pos).length();
+        let [r, g, b] = colors[particle.rule as usize];
         let color = lerp_color(
-            &colors[particle.rule as usize],
+            &Color::new(r, g, b, 0.75),
             &Color::new(1., 1., 1., 0.),
             speed * 0.01,
         );
@@ -37,14 +38,14 @@ fn update_image(
     }
 }
 
-fn generate_colors(rng: &mut ThreadRng) -> [Color; PARTICLES_TYPES_AMOUNT] {
+fn generate_colors(rng: &mut ThreadRng) -> [[f32; 3]; PARTICLES_TYPES_AMOUNT] {
     (0..PARTICLES_TYPES_AMOUNT)
         .map(|_| {
             let mut color = hsl_to_rgb(rng.gen(), 1., 0.5);
             color.a = 0.75;
-            color
+            [color.r, color.g, color.b]
         })
-        .collect::<Vec<Color>>()
+        .collect::<Vec<[f32; 3]>>()
         .try_into()
         .unwrap()
 }
@@ -79,11 +80,18 @@ async fn main() {
                         egui::Grid::new("some_unique_id").show(ui, |ui| {
                             ui.label("".to_string());
                             for y in 0..PARTICLES_TYPES_AMOUNT {
-                                ui.label(y.to_string());
+                                egui::widgets::color_picker::color_edit_button_rgb(
+                                    ui,
+                                    &mut colors[y],
+                                );
                             }
                             ui.end_row();
                             for y in 0..PARTICLES_TYPES_AMOUNT {
-                                ui.label(y.to_string());
+                                // ui.label(y.to_string());
+                                egui::widgets::color_picker::color_edit_button_rgb(
+                                    ui,
+                                    &mut colors[y],
+                                );
                                 for x in 0..PARTICLES_TYPES_AMOUNT {
                                     ui.add(egui::DragValue::new(rules.get_mut(y, x)));
                                 }
