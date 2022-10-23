@@ -73,11 +73,11 @@ async fn main() {
 
         egui_macroquad::ui(|ctx| {
             if show_rules {
-                egui::Window::new("Rules")
+                egui::Window::new("Rules editor")
                     .collapsible(false)
                     .fixed_size((0., 0.))
                     .show(ctx, |ui| {
-                        egui::Grid::new("some_unique_id").show(ui, |ui| {
+                        egui::Grid::new("Rules").show(ui, |ui| {
                             ui.label("".to_string());
                             for y in 0..PARTICLES_TYPES_AMOUNT {
                                 egui::widgets::color_picker::color_edit_button_rgb(
