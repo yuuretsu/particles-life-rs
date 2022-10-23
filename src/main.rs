@@ -46,15 +46,11 @@ fn update_image(
 }
 
 fn generate_colors(rng: &mut ThreadRng) -> [[f32; 3]; PARTICLES_TYPES_AMOUNT] {
-    (0..PARTICLES_TYPES_AMOUNT)
-        .map(|_| {
-            let mut color = hsl_to_rgb(rng.gen(), 1., 0.5);
-            color.a = 0.75;
-            [color.r, color.g, color.b]
-        })
-        .collect::<Vec<[f32; 3]>>()
-        .try_into()
-        .unwrap()
+    [[0., 0., 0.]; PARTICLES_TYPES_AMOUNT].map(|_| {
+        let mut color = hsl_to_rgb(rng.gen(), 1., 0.5);
+        color.a = 0.75;
+        [color.r, color.g, color.b]
+    })
 }
 
 #[macroquad::main("Particles life")]
