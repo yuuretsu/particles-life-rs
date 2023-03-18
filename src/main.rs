@@ -65,6 +65,7 @@ async fn main() {
     rules.fill_random(&mut rng);
 
     let mut paused = false;
+    let mut is_mouse_over_ui = false;
     let mut show_rules = true;
     let mut offset = Draggable::new(Vec2::ZERO);
 
@@ -75,12 +76,15 @@ async fn main() {
         }
 
         egui_macroquad::ui(|ctx| {
+            is_mouse_over_ui = ctx.is_pointer_over_area();
+
             if show_rules {
                 egui::Window::new("Rules editor")
                     .collapsible(false)
                     .fixed_size((0., 0.))
                     .default_pos((10., 50.))
                     .show(ctx, |ui| {
+                        // ui_rects.push(ui.available_rect_before_wrap());
                         egui::Grid::new("Rules").show(ui, |ui| {
                             ui.label("".to_string());
                             for y in 0..PARTICLES_TYPES_AMOUNT {
@@ -127,11 +131,13 @@ async fn main() {
 
         offset.update(mouse_pos);
 
-        if is_mouse_button_pressed(MouseButton::Right) {
-            offset.start_dragging(mouse_pos);
+        if !is_mouse_over_ui {
+            if is_mouse_button_pressed(MouseButton::Left) {
+                offset.start_dragging(mouse_pos);
+            }
         }
 
-        if is_mouse_button_released(MouseButton::Right) {
+        if is_mouse_button_released(MouseButton::Left) {
             offset.end_dragging();
         }
 
@@ -145,6 +151,8 @@ async fn main() {
 
         update_image(&particles, offset.position, &colors);
         egui_macroquad::draw();
+
+        is_mouse_over_ui = false;
 
         next_frame().await;
     }
