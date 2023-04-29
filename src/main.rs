@@ -1,5 +1,7 @@
 mod draggable;
 mod particle_system;
+mod gay_tree;
+mod gay_quad;
 
 use ::rand::{rngs::ThreadRng, thread_rng, Rng};
 use draggable::Draggable;
