@@ -29,7 +29,7 @@ impl Particle {
             let d2 = dx_dy.length_sq();
             let normalised_d2 = d2.max(100.);
             let distance = d2.sqrt();
-            if distance > 50. || distance == 0. {
+            if distance > 50.0 || distance == 0. {
                 return Vec2::ZERO;
             }
             let cur = (-10.).lerp(rule, distance.powf(0.8) * 0.03) * 20.;
@@ -53,3 +53,4 @@ impl Particle {
         self.visual_pos.y = self.visual_pos.y.lerp(self.real_pos.y, 0.2);
     }
 }
+pub const INTERACTION_DISTANCE: f32 = 50.;
