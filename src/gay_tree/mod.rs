@@ -36,9 +36,9 @@ impl GayTree {
 
     pub fn insert(&mut self, point: point) -> bool {
         if !self.boundary_contains_point(&point) {
-            println!("point position is: {} {}", point.pos.x, point.pos.y);
-            println!("my sw is: {} {}", self.boundary.SW.x, self.boundary.SW.y);
-            println!("my ne is: {} {}", self.boundary.NE.x, self.boundary.NE.y);
+            //println!("point position is: {} {}", point.pos.x, point.pos.y);
+            //println!("my sw is: {} {}", self.boundary.SW.x, self.boundary.SW.y);
+            //println!("my ne is: {} {}", self.boundary.NE.x, self.boundary.NE.y);
             return false;
         }
 
@@ -54,9 +54,6 @@ impl GayTree {
                 self.subdivide();
             }
 
-            //println!("MAIN sw is: {} {}", self.boundary.SW.x, self.boundary.SW.y);
-            //println!("MAIN ne is: {} {}", self.boundary.NE.x, self.boundary.NE.y);
-
             if self.nw.as_mut().unwrap().insert(point { id: (point.id), pos: (point.pos) }) {
                 return true;
             }
@@ -70,7 +67,7 @@ impl GayTree {
                 return true;
             }
         }
-        //println!("not inserted");
+        println!("not inserted");
         false
     }
 
@@ -82,12 +79,10 @@ impl GayTree {
         }
 
         if(self.se.is_some()) {
-            //println!("NIGGERS1{}", result.len());
             result.append(self.nw.as_ref().unwrap().retrieve(center, radius).as_mut());
             result.append(self.ne.as_ref().unwrap().retrieve(center, radius).as_mut());
             result.append(self.sw.as_ref().unwrap().retrieve(center, radius).as_mut());
             result.append(self.se.as_ref().unwrap().retrieve(center, radius).as_mut());
-            //println!("NIGGERS{}", result.len());
         }
 
         if self.points.is_some() {
@@ -109,39 +104,39 @@ impl GayTree {
 
         self.nw = Some(Box::new(GayTree::new(
             Borders {
-                NE: Vec2 { x: x + half_width, y: y + half_height },
-                NW: Vec2 { x: x - half_width, y: y + half_height },
-                SW: Vec2 { x: x - half_width, y: y - half_height },
-                SE: Vec2 { x: x + half_width, y: y - half_height },
+                NE: Vec2 { x, y: y + half_height },
+                NW: self.boundary.NW,
+                SW: Vec2 { x: x - half_width, y },
+                SE: Vec2 { x, y},
             },
             self.capacity,
         )));
     
         self.ne = Some(Box::new(GayTree::new(
             Borders {
-                NE: Vec2 { x: x + half_width, y: y - half_height },
-                NW: self.boundary.NE,
-                SW: Vec2 { x: x + half_width, y: y + half_height },
-                SE: Vec2 { x: x - half_width, y: y + half_height },
+                NE: self.boundary.NE,
+                NW: Vec2 { x, y: y+half_height },
+                SW: Vec2 { x, y },
+                SE: Vec2 { x: x + half_width, y},
             },
             self.capacity,
         )));
     
         self.sw = Some(Box::new(GayTree::new(
             Borders {
-                NE: Vec2 { x: x - half_width, y: y + half_height },
-                NW: Vec2 { x: x + half_width, y: y + half_height },
+                NE: Vec2 { x, y },
+                NW: Vec2 { x: x - half_width, y },
                 SW: self.boundary.SW,
-                SE: Vec2 { x: x - half_width, y: y - half_height },
+                SE: Vec2 { x, y: y - half_height },
             },
             self.capacity,
         )));
     
         self.se = Some(Box::new(GayTree::new(
             Borders {
-                NE: Vec2 { x: x + half_width, y: y + half_height },
-                NW: Vec2 { x: x - half_width, y: y + half_height },
-                SW: Vec2 { x: x + half_width, y: y - half_height },
+                NE: Vec2 { x: x + half_width, y },
+                NW: Vec2 { x, y},
+                SW: Vec2 { x, y: y - half_height },
                 SE: self.boundary.SE,
             },
             self.capacity,
@@ -155,14 +150,18 @@ impl GayTree {
             && self.boundary.SW.y <= point.pos.y
     }
     
+    fn check_intersection(circle: &Vec2, pos: &Vec2, radius: f32) -> bool
+    {
+        let dx = circle.x-pos.x;
+        let dy = circle.y-pos.y;
+        (dx*dy + dy*dy) < radius*radius
+    }
+
     fn intersects_circle(&self, center: &Vec2, radius: f32) -> bool {
-        let dx = center.x - (self.boundary.SW.x + self.boundary.NE.x) / 2.0;
-        let dy = center.y - (self.boundary.SW.y + self.boundary.NE.y) / 2.0;
-    
-        let r = radius + ((self.boundary.NE.x - self.boundary.SW.x) / 2.0).sqrt().powi(2)
-            + ((self.boundary.NE.y - self.boundary.SW.y) / 2.0).sqrt().powi(2);
-    
-        dx * dx + dy * dy < r * r
+        Self::check_intersection(center, &self.boundary.NE, radius) ||
+        Self::check_intersection(center, &self.boundary.SE, radius) ||
+        Self::check_intersection(center, &self.boundary.NW, radius) ||
+        Self::check_intersection(center, &self.boundary.SW, radius)
     }
     
     fn contains_point_in_circle(&self, point: &Vec2, center: &Vec2, radius: f32) -> bool {

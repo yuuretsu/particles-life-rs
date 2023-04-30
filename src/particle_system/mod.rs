@@ -2,6 +2,8 @@ mod particle;
 mod rules;
 use std::{f32::consts::PI, cmp::max, vec};
 
+use std::time::Instant;
+
 use egui::Vec2;
 use rand::{rngs::ThreadRng, Rng};
 pub use rules::Rules;
@@ -33,15 +35,8 @@ impl ParticleSystem {
         let mut ne:Vec2 = Vec2 { x: 600., y: 600. };
         let mut sw:Vec2 = Vec2 { x: -600., y: -600. };
 
-        for particle in &self.particles
-        {
-            //ne.x = f32::max(ne.x, particle.real_pos.x);
-            //ne.y = f32::max(ne.y, particle.real_pos.y);
-            //sw.x = f32::min(ne.x, particle.real_pos.x);
-            //sw.y = f32::min(ne.y, particle.real_pos.y);
-        }
-        //println!("{} {} {} {}", ne.x, ne.y, sw.x, sw.y);
         let mut forces = [Vec2::ZERO; PARTICLES_AMOUNT];
+        //let start = Instant::now();
         let mut tree:GayTree = GayTree::new(Borders { SE: (Vec2 { x: (sw.x), y: (ne.y) }), SW: (sw), NW: (Vec2 { x: (ne.x), y: (sw.y) }), NE: (ne) }, TREE_CHUNK_CAPACITY);
 
         for (i, particle) in self.particles.iter().enumerate() 
@@ -50,25 +45,23 @@ impl ParticleSystem {
         }
 
         for (i, particle) in self.particles.iter().enumerate() {
-            let mut other_points: Vec<usize> = tree.retrieve(&particle.real_pos, INTERACTION_DISTANCE);
-            //println!("{}", other_points.len());
+            let other_points: Vec<usize> = tree.retrieve(&particle.real_pos, INTERACTION_DISTANCE);
             for other_point in other_points {
-                let other_particle = &self.particles[other_point];
+            let other_particle = &self.particles[other_point];
                 forces[i] += particle.get_force(other_particle, rules);
             }
-            for other_particle in &self.particles {
-                //forces[i] += particle.get_force(other_particle, rules);
-            }
         }
+        //let end = Instant::now();
+        //let elapsed = end.duration_since(start);
+        //println!("Elapsed time: {:?}", elapsed);
         forces
     }
     pub fn step(&mut self, rng: &mut ThreadRng, rules: &Rules) {
         let forces = self.get_forces(rules);
         for i in 0..forces.len() {
-        //for i in 0..PARTICLES_AMOUNT
-        //{
             self.particles[i].apply_force(rng, forces[i]);
         }
+        
     }
 }
 
@@ -83,4 +76,4 @@ impl<'a> IntoIterator for &'a ParticleSystem {
 
 pub const PARTICLES_AMOUNT: usize = 2000;
 pub const PARTICLES_TYPES_AMOUNT: usize = 4;
-pub const TREE_CHUNK_CAPACITY: usize = 60;
+pub const TREE_CHUNK_CAPACITY: usize = 100;
