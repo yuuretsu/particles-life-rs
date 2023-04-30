@@ -3,6 +3,8 @@ mod particle_system;
 mod gay_tree;
 mod gay_quad;
 
+use std::time::Instant;
+
 use ::rand::{rngs::ThreadRng, thread_rng, Rng};
 use draggable::Draggable;
 use egui::Vec2;
@@ -70,15 +72,30 @@ async fn main() {
     let mut is_mouse_over_ui = false;
     let mut show_rules = true;
     let mut offset = Draggable::new(Vec2::ZERO);
+    let mut tree_chunk_cap = 120;
+    let mut fps:f32 = 0.;
 
     loop {
+        let start = Instant::now();
         let mouse_pos: Vec2 = mouse_position().into();
         if !paused {
+            particles.tree_chuck_capacity = tree_chunk_cap;
             particles.step(&mut rng, &rules);
         }
 
         egui_macroquad::ui(|ctx| {
             is_mouse_over_ui = ctx.is_pointer_over_area();
+
+            egui::Window::new("GayTreeChunkCapacity")
+            .collapsible(false)
+            .fixed_size((60., 60.))
+            .default_pos((10., 200.))
+            .show(ctx, |ui| 
+                {
+                    //ui.label("".to_string());
+                    ui.add(egui::Slider::new(&mut tree_chunk_cap, 20..=1000).text("capacity"));
+                    ui.add(egui::widgets::Label::new("fps:".to_string() + &fps.to_string()));
+                });
 
             if show_rules {
                 egui::Window::new("Rules editor")
@@ -157,5 +174,8 @@ async fn main() {
         is_mouse_over_ui = false;
 
         next_frame().await;
+        let end = Instant::now();
+        let elapsed = end.duration_since(start).as_secs_f32();
+        fps = 1./elapsed;
     }
 }

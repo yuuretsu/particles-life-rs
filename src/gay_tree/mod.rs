@@ -39,6 +39,7 @@ impl GayTree {
             //println!("point position is: {} {}", point.pos.x, point.pos.y);
             //println!("my sw is: {} {}", self.boundary.SW.x, self.boundary.SW.y);
             //println!("my ne is: {} {}", self.boundary.NE.x, self.boundary.NE.y);
+            //panic!();
             return false;
         }
 
@@ -105,7 +106,7 @@ impl GayTree {
         self.nw = Some(Box::new(GayTree::new(
             Borders {
                 NE: Vec2 { x, y: y + half_height },
-                NW: self.boundary.NW,
+                NW: Vec2 { x: x - half_width, y: y + half_height},
                 SW: Vec2 { x: x - half_width, y },
                 SE: Vec2 { x, y},
             },
@@ -114,7 +115,7 @@ impl GayTree {
     
         self.ne = Some(Box::new(GayTree::new(
             Borders {
-                NE: self.boundary.NE,
+                NE: Vec2 { x : x+ half_width, y: y+half_height },
                 NW: Vec2 { x, y: y+half_height },
                 SW: Vec2 { x, y },
                 SE: Vec2 { x: x + half_width, y},
@@ -124,9 +125,9 @@ impl GayTree {
     
         self.sw = Some(Box::new(GayTree::new(
             Borders {
-                NE: Vec2 { x, y },
+                NE: Vec2 { x, y},
                 NW: Vec2 { x: x - half_width, y },
-                SW: self.boundary.SW,
+                SW: Vec2 { x:x - half_width, y:y - half_height },
                 SE: Vec2 { x, y: y - half_height },
             },
             self.capacity,
@@ -137,7 +138,7 @@ impl GayTree {
                 NE: Vec2 { x: x + half_width, y },
                 NW: Vec2 { x, y},
                 SW: Vec2 { x, y: y - half_height },
-                SE: self.boundary.SE,
+                SE: Vec2 { x: x + half_width, y: y - half_height },
             },
             self.capacity,
         )));

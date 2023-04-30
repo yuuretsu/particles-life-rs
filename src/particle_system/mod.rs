@@ -14,6 +14,7 @@ use self::particle::{Particle, INTERACTION_DISTANCE};
 
 pub struct ParticleSystem {
     particles: [Particle; PARTICLES_AMOUNT],
+    pub tree_chuck_capacity: usize
 }
 
 impl ParticleSystem {
@@ -29,7 +30,7 @@ impl ParticleSystem {
                 rng.gen::<u8>() % PARTICLES_TYPES_AMOUNT as u8,
             );
         }
-        Self { particles: list}
+        Self { particles: list, tree_chuck_capacity:120}
     }
     fn get_forces(&self, rules: &Rules) -> [Vec2; PARTICLES_AMOUNT] {
         let mut ne:Vec2 = Vec2 { x: 600., y: 600. };
@@ -37,7 +38,7 @@ impl ParticleSystem {
 
         let mut forces = [Vec2::ZERO; PARTICLES_AMOUNT];
         //let start = Instant::now();
-        let mut tree:GayTree = GayTree::new(Borders { SE: (Vec2 { x: (sw.x), y: (ne.y) }), SW: (sw), NW: (Vec2 { x: (ne.x), y: (sw.y) }), NE: (ne) }, TREE_CHUNK_CAPACITY);
+        let mut tree:GayTree = GayTree::new(Borders { SE: (Vec2 { x: (sw.x), y: (ne.y) }), SW: (sw), NW: (Vec2 { x: (ne.x), y: (sw.y) }), NE: (ne) }, self.tree_chuck_capacity);
 
         for (i, particle) in self.particles.iter().enumerate() 
         {
@@ -75,5 +76,4 @@ impl<'a> IntoIterator for &'a ParticleSystem {
 }
 
 pub const PARTICLES_AMOUNT: usize = 2000;
-pub const PARTICLES_TYPES_AMOUNT: usize = 4;
-pub const TREE_CHUNK_CAPACITY: usize = 100;
+pub const PARTICLES_TYPES_AMOUNT: usize = 12;
