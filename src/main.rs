@@ -114,7 +114,7 @@ async fn main() {
                 .collapsible(false)
                 .show(ctx, |ui| {
                     ui.horizontal(|ui| {
-                        let pause_btn = ui.button(if paused { "Continue" } else { "Pause" });
+                        let pause_btn = ui.button(if paused { "⏵" } else { "⏸" });
                         if pause_btn.clicked() {
                             paused = !paused;
                         }
